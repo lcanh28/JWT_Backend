@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
-import connect from '../configs/connectData';
 import mysql from 'mysql2/promise';
 import Bluebird from 'bluebird';
+import db from '../models/index';
 
 const salt = bcrypt.genSaltSync(10);
 
@@ -11,22 +11,13 @@ const hashUserPassword = (userPassword) => {
 };
 
 const createNewUser = async (email, password, username) => {
-    const db = await mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        password: '123456789',
-        database: 'jwt',
-        Promise: Bluebird,
-    });
-
     let hashPass = hashUserPassword(password);
     try {
-        const [rows, fields] = await db.execute('INSERT INTO users (email, password, username) VALUES (?, ?, ?)', [
-            email,
-            hashPass,
-            username,
-        ]);
-        return rows;
+        await db.User.create({
+            username: username,
+            email: email,
+            password: password,
+        });
     } catch (err) {
         console.log(err);
     }
@@ -41,7 +32,7 @@ const getUserList = async () => {
         Promise: Bluebird,
     });
     try {
-        const [rows, fields] = await db.execute('SELECT * FROM users');
+        const [rows, fields] = await db.execute('SELECT * FROM user');
         return rows;
     } catch (err) {
         console.log(err);
@@ -58,7 +49,7 @@ const deleUser = async (id) => {
     });
 
     try {
-        const [rows, fields] = await db.execute('DELETE FROM users WHERE id = ?', [id]);
+        const [rows, fields] = await db.execute('DELETE FROM user WHERE id = ?', [id]);
     } catch (err) {
         console.log(err);
     }
@@ -74,7 +65,7 @@ const getUserByID = async (id) => {
     });
 
     try {
-        const [rows, fields] = await db.execute('SELECT * FROM users WHERE id = ?', [id]);
+        const [rows, fields] = await db.execute('SELECT * FROM user WHERE id = ?', [id]);
         return rows;
     } catch (err) {
         console.log(err);
@@ -91,7 +82,7 @@ const updateUser = async (email, username, id) => {
     });
 
     try {
-        const [rows, fields] = await db.execute('UPDATE users SET email = ? , username = ? WHERE id = ?', [
+        const [rows, fields] = await db.execute('UPDATE user SET email = ? , username = ? WHERE id = ?', [
             email,
             username,
             id,
