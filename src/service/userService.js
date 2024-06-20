@@ -1,8 +1,17 @@
 import bcrypt from 'bcryptjs';
-import mysql from 'mysql2/promise';
-import Bluebird from 'bluebird';
 import db from '../models/index';
-import { where } from 'sequelize/lib/sequelize';
+
+//connect data basic
+
+// import mysql from 'mysql2/promise';
+// import Bluebird from 'bluebird';
+// const db = await mysql.createConnection({
+//     host: 'localhost',
+//     user: 'root',
+//     password: '123456789',
+//     database: 'jwt',
+//     Promise: Bluebird,
+// });
 
 const salt = bcrypt.genSaltSync(10);
 
@@ -24,45 +33,24 @@ const getUserList = async () => {
     let users = [];
     users = await db.User.findAll();
     return users;
-    // try {
-    //     const [rows, fields] = await db.execute('SELECT * FROM user');
-    //     return rows;
-    // } catch (err) {
-    //     console.log(err);
-    // }
 };
 
 const deleUser = async (userId) => {
     await db.User.destroy({
         where: { id: userId },
     });
-    // try {
-    //     const [rows, fields] = await db.execute('DELETE FROM user WHERE id = ?', [id]);
-    // } catch (err) {
-    //     console.log(err);
-    // }
 };
 
 const getUserByID = async (id) => {
-    try {
-        const [rows, fields] = await db.execute('SELECT * FROM user WHERE id = ?', [id]);
-        return rows;
-    } catch (err) {
-        console.log(err);
-    }
+    let user = {};
+    user = await db.User.findOne({
+        where: { id: id },
+    });
+    return user.get({ plain: true });
 };
 
 const updateUser = async (email, username, id) => {
-    try {
-        const [rows, fields] = await db.execute('UPDATE user SET email = ? , username = ? WHERE id = ?', [
-            email,
-            username,
-            id,
-        ]);
-        return rows;
-    } catch (err) {
-        console.log(err);
-    }
+    await db.User.update({ email: email, username: username }, { where: { id: id } });
 };
 module.exports = {
     createNewUser,
