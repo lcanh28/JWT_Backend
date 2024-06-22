@@ -8,7 +8,8 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            // define association here
+            User.belongsTo(models.Group);
+            User.belongsToMany(models.Project, { through: 'Project_User' });
         }
     }
     //object relation mapping
@@ -17,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
             email: DataTypes.STRING,
             password: DataTypes.STRING,
             username: DataTypes.STRING,
+            address: DataTypes.STRING,
+            sex: DataTypes.STRING,
+            phone: DataTypes.STRING,
+            groupId: DataTypes.INTEGER,
         },
         {
             sequelize,
