@@ -1,5 +1,6 @@
 import db from '../models/index';
 import bcrypt from 'bcryptjs';
+import { Op } from 'sequelize';
 
 const salt = bcrypt.genSaltSync(10);
 
@@ -32,6 +33,7 @@ const checkPhoneExist = async (userPhone) => {
 const registerNewUser = async (rawUserData) => {
     //check email, phone, username, password are exist
     try {
+        //check email is exist
         let isEmailExist = await checkEmailExist(rawUserData.email);
         if (isEmailExist) {
             return {
@@ -39,8 +41,8 @@ const registerNewUser = async (rawUserData) => {
                 EC: 1,
             };
         }
+        //check phone is exist
         let isPhoneExist = await checkPhoneExist(rawUserData.phone);
-        console.log(isPhoneExist);
         if (isPhoneExist) {
             return {
                 EM: 'The phone number is already exist',
@@ -62,6 +64,44 @@ const registerNewUser = async (rawUserData) => {
             EC: 0,
         };
     } catch (e) {
+        return {
+            EM: 'Something wrongs in service....',
+            EC: -2,
+        };
+    }
+};
+
+const checkPassword = (inputPassword, hashPassword) => {
+    return bcrypt.compareSync(inputPassword, hashPassword);
+};
+
+const handleUserLogin = async (rawData) => {
+    try {
+        let user = await db.User.findOne({
+            where: {
+                [Op.or]: [{ email: rawData.accountLogin }, { phone: rawData.accountLogin }],
+            },
+        });
+
+        if (user) {
+            console.log('>> Found user with email/phone');
+            //check password is exist
+            let isCorrectPassword = checkPassword(rawData.password, user.password);
+            if (isCorrectPassword === true) {
+                return {
+                    EM: 'Login successful',
+                    EC: 0,
+                    DT: '',
+                };
+            }
+        }
+        console.log('>> Input user with email/phone: ', rawData.accountLogin, 'password: ', rawData.password);
+        return {
+            EM: 'Your email/phone number or password is incorrect',
+            EC: 1,
+            DT: '',
+        };
+    } catch (e) {
         console.log(e);
         return {
             EM: 'Something wrongs in service....',
@@ -72,4 +112,5 @@ const registerNewUser = async (rawUserData) => {
 
 module.exports = {
     registerNewUser,
+    handleUserLogin,
 };
