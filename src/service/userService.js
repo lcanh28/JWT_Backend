@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs';
 import db from '../models/index';
-import { where } from 'sequelize/lib/sequelize';
 
 //connect data basic
 
