@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs';
 import db from '../models/index';
-import { where } from 'sequelize/lib/sequelize';
 
 const getAllUser = async () => {
     try {
@@ -27,7 +26,35 @@ const getAllUser = async () => {
         console.log(e);
         return {
             EM: 'Something wrongs in services....',
+            EC: 1,
+            DT: []
+        }
+    }
+}
+const getUsersWithPagination = async (page, limit) => {
+    try{
+        let offset = (page - 1) * limit
+
+        const {count, rows} = await db.User.findAndCountAll({
+            offset: offset,
+            limit: limit,
+        })
+        let totalPages = Math.ceil(count/limit)
+        let data = {
+            totalRows: count,
+            totalPages: totalPages,
+            users: rows
+        }
+        return {
+            EM: 'success',
             EC: 0,
+            DT: data, //data
+        };
+    }catch(e){
+        console.log(e);
+        return {
+            EM: 'Something wrongs in services....',
+            EC: 1,
             DT: []
         }
     }
@@ -41,7 +68,7 @@ const createNewUser = async (data) => {
         console.log(e);
         return {
             EM: 'Something wrongs in services....',
-            EC: 0,
+            EC: 1,
             DT: []
         }
     }
@@ -62,7 +89,7 @@ const updateUser = async (data) => {
         console.log(e);
         return {
             EM: 'Something wrongs in services....',
-            EC: 0,
+            EC: 1,
             DT: []
         }
     }
@@ -76,10 +103,10 @@ const deleteUser = async (id) => {
         console.log(e);
         return {
             EM: 'Something wrongs in services....',
-            EC: 0,
+            EC: 1,
             DT: []
         }
     }
 }
 
-module.exports = { getAllUser, createNewUser, updateUser, deleteUser }
+module.exports = { getAllUser, createNewUser, updateUser, deleteUser, getUsersWithPagination }
