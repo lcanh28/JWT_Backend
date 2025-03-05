@@ -32,7 +32,15 @@ const readFunc = async (req, res) => {
 }
 const createFunc = async (req, res) => {
     try{
-        let users = await userApiService.getAllUser();
+        if (req.body.password && req.body.password.length < 3) {
+            return res.status(200).json({
+                EM: 'Your password must have more than 2 letters',
+                EC: '1',
+                DT: '',
+            });
+        }
+        
+        let data = await userApiService.createNewUser(req.body);
         
         return res.status(200).json({
             EM: data.EM, //error message
