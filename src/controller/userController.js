@@ -36,7 +36,7 @@ const createFunc = async (req, res) => {
             return res.status(200).json({
                 EM: 'Your password must have more than 2 letters',
                 EC: '1',
-                DT: '',
+                DT: 'password',
             });
         }
         
@@ -59,9 +59,13 @@ const createFunc = async (req, res) => {
 
 const updateFunc = async (req, res) => {
     try{
-        let users = await userApiService.getAllUser();
-
-
+        let data = await userApiService.updateUser(req.body);
+        
+        return res.status(200).json({
+            EM: data.EM, //error message
+            EC: data.EC, //error code
+            DT: data.DT, //data
+        });
     }catch(e){
         console.log(e)
         return res.status(500).json({

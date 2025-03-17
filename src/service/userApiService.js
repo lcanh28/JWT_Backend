@@ -40,8 +40,9 @@ const getUsersWithPagination = async (page, limit) => {
         const {count, rows} = await db.User.findAndCountAll({
             offset: offset,
             limit: limit,
-            attributes: ['id', 'username', 'email', 'phone', 'sex'],
-            include: { model: db.Group, attributes: ['name', 'description'] },
+            attributes: ['id', 'username', 'email', 'phone', 'sex', 'address'],
+            include: { model: db.Group, attributes: ['name', 'description', 'id'] },
+            order: [['id', 'DESC']]
         })
         let totalPages = Math.ceil(count/limit)
         let data = {
@@ -96,7 +97,7 @@ const createNewUser = async (data) => {
             return {
                 EM: 'The email is already exist',
                 EC: 1,
-                DT: []
+                DT: 'email'
             };
         }
         //check phone is exist
@@ -105,7 +106,7 @@ const createNewUser = async (data) => {
             return {
                 EM: 'The phone number is already exist',
                 EC: 1,
-                DT: []
+                DT: 'phone'
             };
         }
         //hash user password
@@ -114,7 +115,7 @@ const createNewUser = async (data) => {
         //create new user
         await db.User.create({...data, password: hashPassword});
         return {
-            EM: 'User is created successfully',
+            EM: 'User is created success',
             EC: 0,
             DT: []
         };
@@ -128,15 +129,36 @@ const createNewUser = async (data) => {
 }
 const updateUser = async (data) => {
     try {
+        if(!data.groupId) {
+            return {
+                EM: 'User is not group',
+                EC: 1,
+                DT: 'group'
+            }
+        }
         let user = await db.User.findOne({
             where: {id: data.id}
         })
         if(user) {
-            user.save({
-
+            console.log(data)
+            //update
+            await user.update({
+                username: data.username,
+                address: data.address,
+                sex: data.sex,
+                groupId: data.groupId
             })
+            return {
+                EM: 'User is updated success',
+                EC: 0,
+                DT: []
+            };
         } else {
-
+            return {
+                EM: 'User not found',
+                EC: 2,
+                DT: []
+            };
         }
     } catch(e) {
         console.log(e);
