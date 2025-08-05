@@ -96,8 +96,9 @@ const handleUserLogin = async (rawData) => {
                 let groupWithRoles = await getGroupWithRoles(user);
                 let payload = {
                     email: user.email,
-                    groupWithRoles: groupWithRoles,
-                    expiresIn: process.env.JWT_EXPIRES_IN
+                    username: user.username,
+                    groupId: user.groupId,
+                    groupWithRoles: groupWithRoles
                 }
                 let token = createJWT(payload)
                 return {
@@ -105,7 +106,9 @@ const handleUserLogin = async (rawData) => {
                     EC: 0,
                     DT: {
                         access_token: token,
-                        groupWithRoles
+                        groupWithRoles,
+                        email: user.email,
+                        username: user.username
                     }
                 };
             }

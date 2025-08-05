@@ -8,7 +8,9 @@ const createJWT = (payload) => {
     var token
 
     try {
-        token = jwt.sign(payload , key)
+        token = jwt.sign(payload , key, {
+            expiresIn: process.env.JWT_EXPIRES_IN
+        })
         // console.log(token)
     } catch(e) {
         console.log(e)
@@ -36,11 +38,12 @@ const checkUserJWT = (req, res, next) => {
         let decoded = verifyToken(token)
         if(decoded) {
             req.user = decoded
+            req.token = token
             next()
         }
     } else {
         return res.status(401).json({
-            EC: -1,
+            EC: '-1',
             DT: '',
             EM: 'Not authenticated the user'
         })
@@ -48,7 +51,7 @@ const checkUserJWT = (req, res, next) => {
 }
 
 const checkUserPermission = (req, res, next) => {
-    if(nonSecurePaths.includes(req.path)) return next()
+    if(nonSecurePaths.includes(req.path) || req.path === '/account') return next()
     if(req.user) {
         let email = req.user.email
         let roles = req.user.groupWithRoles.Roles
@@ -56,7 +59,7 @@ const checkUserPermission = (req, res, next) => {
 
         if(!roles || roles.length === 0) {
             return res.status(403).json({
-                EC: -1,
+                EC: '-1',
                 DT: '',
                 EM: 'You don`t have permission to access this resource!!!'
             })
@@ -66,15 +69,14 @@ const checkUserPermission = (req, res, next) => {
             next()
         } else {
             return res.status(403).json({
-                EC: -1,
+                EC: '-1',
                 DT: '',
                 EM: 'You don`t have permission to access this resource!!!'
             })
-        }
-        
+        }      
     } else {
         return res.status(401).json({
-            EC: -1,
+            EC: '-1',
             DT: '',
             EM: 'Not authenticated the user'
         })
