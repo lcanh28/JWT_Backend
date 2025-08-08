@@ -36,10 +36,17 @@ const checkUserJWT = (req, res, next) => {
     if(cookie && cookie.jwt) {
         let token = cookie.jwt
         let decoded = verifyToken(token)
+        console.log(decoded)
         if(decoded) {
             req.user = decoded
             req.token = token
             next()
+        } else {
+            return res.status(401).json({
+                EC: '-1',
+                DT: '',
+                EM: 'Not authenticated the user'
+            })
         }
     } else {
         return res.status(401).json({
